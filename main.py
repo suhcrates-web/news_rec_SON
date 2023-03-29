@@ -99,5 +99,5 @@ async def hello(ga:str, gid:str=None):
             print(e)
     return dics1
 
-if __name__ == '__main__':
-    uvicorn.run(app, port=8001, host='localhost')
+# if __name__ == '__main__':
+#     uvicorn.run(app, port=8001, host='localhost')
