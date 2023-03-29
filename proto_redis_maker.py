@@ -41,12 +41,9 @@ cursor.execute(
     """
 )
 
-gid, mat, title, url, thumburl, tot_gid, tot_mat = cursor.fetchall()[0]
+gid, mat, title, url, thumburl = cursor.fetchall()[0]
 
-tot_mat = np.frombuffer(tot_mat,dtype='float32').reshape(-1,30)
-tot_gid = json.loads(tot_gid)
 pipe2 = r2.pipeline()
-
 r2.set('mat',mat)
 r2.set('title', title)
 r2.set('gid', gid)
