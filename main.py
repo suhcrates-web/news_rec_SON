@@ -11,8 +11,7 @@ import pickle
 import timeit
 from collections import defaultdict
 
-def find_10_alt(tot_mat, user_vector, gisa_vector,gid,gid_list, history):
-    out_list = np.array([k for k, v in history.items() if v >= 3])
+def find_10_alt(tot_mat, user_vector, gisa_vector,gid_list, out_list):
     del_index = np.where(np.isin(gid_list, out_list))
     tot_mat[del_index] =0
     sorted_g = np.argsort(np.matmul(tot_mat, gisa_vector))[::-1][:5]
@@ -74,10 +73,12 @@ async def hello(ga:str, gid:str=None):
             history = pickle.loads(history) if history!=None else defaultdict(int)
 
             history[gid] += 10
-            top10 = find_10_alt(mat, u_vec, g_vec,gid, gid_list,history)
+            out_list = np.array([k for k, v in history.items() if v >= 3])
+            top10 = find_10_alt(mat, u_vec, g_vec, gid_list,out_list)
+            if len(out_list) >200:
+                history = defaultdict(int)
             for gid0 in gid_list[top10]:
                 history[gid0] += 1
-
             r3.set(ga, pickle.dumps(history))
             r3.expire(ga,600)
             u_vec = (1 - p) * g_vec + p * u_vec
@@ -98,5 +99,5 @@ async def hello(ga:str, gid:str=None):
             print(e)
     return dics1
 
-# if __name__ == '__main__':
-#     uvicorn.run(app, port=8001, host='localhost')
+if __name__ == '__main__':
+    uvicorn.run(app, port=8001, host='localhost')
