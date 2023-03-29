@@ -75,7 +75,7 @@ async def hello(ga:str, gid:str=None):
             history[gid] += 10
             out_list = np.array([k for k, v in history.items() if v >= 3])
             top10 = find_10_alt(mat, u_vec, g_vec, gid_list,out_list)
-            if len(out_list) >200:
+            if len(out_list) >100:
                 history = defaultdict(int)
             for gid0 in gid_list[top10]:
                 history[gid0] += 1
