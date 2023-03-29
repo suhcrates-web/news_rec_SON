@@ -1,0 +1,15 @@
+/venv
+/__pycache__
+/.idea
+/작업일지
+database.py
+make_test_user_db.py
+test*.py
+*.model
+exp*.py
+*.txt
+!ReadMe.txt
+*.log
+v1*.py
+v2*.py
+v3*.py
