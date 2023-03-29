@@ -51,17 +51,18 @@ def son_updater():
     # r2 업데이트
     cursor.execute(
         """
-        select gid, mat, title, url, thumburl from news_recommend.carrier where id0=1
+        select gid, mat, title, url, thumburl, default0 from news_recommend.carrier where id0=1
         """
     )
 
-    gid, mat, title, url, thumburl = cursor.fetchall()[0]
+    gid, mat, title, url, thumburl, default0 = cursor.fetchall()[0]
 
     pipe2.set('gid',gid)
     pipe2.set('mat',mat)
     pipe2.set('title', title)
     pipe2.set('url', url)
     pipe2.set('thumburl', thumburl)
+    pipe2.set('default0', default0)
     pipe2.execute()
 
 

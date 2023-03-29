@@ -46,7 +46,7 @@ async def hello(ga:str, gid:str=None):
                 u_vec = r1.get(ga)
                 if u_vec == None:  # 사용자 ga에 해당하는 벡터가 없음
                     # 완전히 새로운 추천
-                    u_vec = r2.get('temp')
+                    u_vec = r2.get('default0')
                     g_vec = u_vec
                 else:  # 사용자 ga에 해당하는 벡터가 있음
                     g_vec = u_vec
@@ -63,7 +63,7 @@ async def hello(ga:str, gid:str=None):
                         u_vec = g_vec
                     else:  # gid에 해당하는 벡터도 없음
                         # 완전히 새로운 추천
-                        u_vec = r2.get('temp')
+                        u_vec = r2.get('default0')
                         g_vec = u_vec
             u_vec = np.frombuffer(u_vec, dtype='float32')
             g_vec = np.frombuffer(g_vec, dtype='float32')
@@ -98,5 +98,5 @@ async def hello(ga:str, gid:str=None):
             print(e)
     return dics1
 
-# if __name__ == '__main__':
-#     uvicorn.run(app, port=8001, host='localhost')
+if __name__ == '__main__':
+    uvicorn.run(app, port=8001, host='localhost')

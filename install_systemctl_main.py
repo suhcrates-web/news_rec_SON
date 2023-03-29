@@ -14,7 +14,7 @@ User=root
 Group=root
 WorkingDirectory={working_dir}
 Environment="PATH={sys.prefix}/bin"
-ExecStart={sys.executable}/bin/gunicorn main:app --workers 2 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:8001
+ExecStart={sys.executable.replace('python3.11','')}/gunicorn main:app --workers 2 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:8001
 Restart=always
 
 [Install] 
