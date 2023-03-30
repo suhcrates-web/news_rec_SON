@@ -76,11 +76,12 @@ async def hello(ga:str, gid:str=None):
             out_list = np.array([k for k, v in history.items() if v >= 3])
             top10 = find_10_alt(mat, u_vec, g_vec, gid_list,out_list)
             if len(out_list) >100:
-                history = defaultdict(int)
-            for gid0 in gid_list[top10]:
-                history[gid0] += 1
-            r3.set(ga, pickle.dumps(history))
-            r3.expire(ga,600)
+                r3.delete(ga)
+            else:
+                for gid0 in gid_list[top10]:
+                    history[gid0] += 1
+                r3.set(ga, pickle.dumps(history))
+                r3.expire(ga,600)
             u_vec = (1 - p) * g_vec + p * u_vec
             r1.set(ga, u_vec.tobytes())
             r1.expire(ga, 2592000)  # 60*60*24*30 : 30일 뒤
