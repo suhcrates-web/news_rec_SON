@@ -74,7 +74,7 @@ async def hello(ga:str, gid:str=None):
             if len(out_list) >100:
                 r3.delete(ga)
             else:
-                for gid0 in gid_list[top10][:5]:
+                for gid0 in gid_list[top10][:6]:
                     history[gid0] += 1
                 r3.set(ga, pickle.dumps(history))
                 r3.expire(ga,600)
