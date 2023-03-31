@@ -1,14 +1,12 @@
 # main_v2
 from fastapi import FastAPI
 import numpy as np
-import json
+from numpy.random import randint
 import redis
 from redis import ConnectionPool
 import uvicorn
-from datetime import datetime
 import traceback
 import pickle
-import timeit
 from collections import defaultdict
 
 def find_10_alt(tot_mat, user_vector, gisa_vector,gid_list, out_list):
@@ -27,17 +25,13 @@ pool = ConnectionPool(host='localhost', port=6379, db=0)
 pool1 = ConnectionPool(host='localhost', port=6379, db=1)
 pool2 = ConnectionPool(host='localhost', port=6379, db=2)
 pool3 = ConnectionPool(host='localhost', port=6379, db=3)
-pool4 = ConnectionPool(host='localhost', port=6379, db=4)
 r = redis.Redis(connection_pool=pool)
 r1 = redis.Redis(connection_pool=pool1)
 r2 = redis.Redis(connection_pool=pool2)
 r3 = redis.Redis(connection_pool=pool3)
-r4 = redis.Redis(connection_pool=pool3)
-
 @app.get("/{ga}/{gid}")
 async def hello(ga:str, gid:str=None):
     gid = None if gid=='_' else gid
-    p = 0.3
     dics1= {}
     for _ in range(3):
         try:  # # redis에서 이유 없이 None 이 나오는 경우가 매우 드물게 있어서 3번 시도.
@@ -71,18 +65,20 @@ async def hello(ga:str, gid:str=None):
             mat = np.frombuffer(mat, dtype='float32').reshape(-1, 50).copy()
             history = r3.get(ga)
             history = pickle.loads(history) if history!=None else defaultdict(int)
-
+            history['read'] +=1
+            reversep = history['read']
+            p = 1/reversep if reversep <12 else 1/12
             history[gid] += 10
             out_list = np.array([k for k, v in history.items() if v >= 3])
             top10 = find_10_alt(mat, u_vec, g_vec, gid_list,out_list)
             if len(out_list) >100:
                 r3.delete(ga)
             else:
-                for gid0 in gid_list[top10]:
+                for gid0 in gid_list[top10][:5]:
                     history[gid0] += 1
                 r3.set(ga, pickle.dumps(history))
                 r3.expire(ga,600)
-            u_vec = (1 - p) * g_vec + p * u_vec
+            u_vec = p * g_vec + (1-p) * u_vec
             r1.set(ga, u_vec.tobytes())
             r1.expire(ga, 2592000)  # 60*60*24*30 : 30일 뒤
             a = r2.get('title')
