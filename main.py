@@ -1,4 +1,5 @@
-# main_v2
+# v3_main
+# 리스트가 가끔 11개 오는 문제 해결.  gid 에 해당하는 기사 벡터를 0으로. 'sorted_u_reverse'를 선택할 경우 점수가 '0'인 곳에서 기사를 추천하는 경우가 생김. 여기서 gid 가 중복으로 골라져 마지막에 걸러져 11개가 나오는것.
 from fastapi import FastAPI
 import numpy as np
 from numpy.random import randint
@@ -16,7 +17,7 @@ def find_10_alt(tot_mat, user_vector, gisa_vector,gid_list, out_list):
     tot_mat[sorted_g] = 0
     sorted_u_origin = np.argsort(np.matmul(tot_mat, user_vector))[::-1]
     sorted_u = sorted_u_origin[:5]
-    sorted_u_reverse = sorted_u_origin[-2:]
+    sorted_u_reverse = sorted_u_origin[-3:]
     top10 = np.concatenate((sorted_g, sorted_u, sorted_u_reverse)).astype('int32')
     return top10
 
@@ -71,13 +72,18 @@ async def hello(ga:str, gid:str=None):
             history[gid] += 10
             out_list = np.array([k for k, v in history.items() if v >= 3])
             top10 = find_10_alt(mat, u_vec, g_vec, gid_list,out_list)
+            row_del = None
             if len(out_list) >100:
                 r3.delete(ga)
             else:
-                for gid0 in gid_list[top10][:6]:
-                    history[gid0] += 1
+                for i, gid0 in enumerate(gid_list[top10]):
+                    if i <= 6:
+                        history[gid0] += 1
+                    if gid == gid0:
+                        row_del = i
                 r3.set(ga, pickle.dumps(history))
                 r3.expire(ga,600)
+            top10 = np.delete(top10, row_del, axis=0)[:12] if row_del != None else top10[:12]
             u_vec = p * g_vec + (1-p) * u_vec
             r1.set(ga, u_vec.tobytes())
             r1.expire(ga, 2592000)  # 60*60*24*30 : 30일 뒤
@@ -96,5 +102,5 @@ async def hello(ga:str, gid:str=None):
             print(e)
     return dics1
 
-if __name__ == '__main__':
-    uvicorn.run(app, port=8001, host='localhost')
+# if __name__ == '__main__':
+#     uvicorn.run(app, port=8001, host='0.0.0.0')
