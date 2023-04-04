@@ -45,7 +45,7 @@ def son_updater():
     #삭제
     del_array = np.setdiff1d(r_gids, m_gids) # redis에만 있는거 (삭제)
     for gid0 in del_array:
-        pipe0.delete(gid0)
+        pipe0.delete(str(gid0))  # int32 들어가서 에러남
     pipe0.execute()
 
     # r2 업데이트
