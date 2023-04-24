@@ -86,7 +86,7 @@ async def hello(ga:str, gid:str=None):
             top10 = np.delete(top10, row_del, axis=0)[:12] if row_del != None else top10[:12]
             u_vec = p * g_vec + (1-p) * u_vec
             r1.set(ga, u_vec.tobytes())
-            r1.expire(ga, 2592000)  # 60*60*24*30 : 30일 뒤
+            r1.expire(ga, 864000)  # 60*60*24*10 : 10일 뒤로 낮춤.
             a = r2.get('title')
             title_list = np.frombuffer(a, dtype='U59')
             url_list = np.frombuffer(r2.get('url'), dtype='U68')
