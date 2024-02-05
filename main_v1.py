@@ -26,16 +26,13 @@ pool = ConnectionPool(host='localhost', port=6379, db=0)
 pool1 = ConnectionPool(host='localhost', port=6379, db=1)
 pool2 = ConnectionPool(host='localhost', port=6379, db=2)
 pool3 = ConnectionPool(host='localhost', port=6379, db=3)
-pool4 = ConnectionPool(host='localhost', port=6379, db=4)
 r = redis.Redis(connection_pool=pool)
 r1 = redis.Redis(connection_pool=pool1)
 r2 = redis.Redis(connection_pool=pool2)
 r3 = redis.Redis(connection_pool=pool3)
-r4 = redis.Redis(connection_pool=pool4)
 @app.get("/{ga}/{gid}")
 async def hello(ga:str, gid:str=None):
     gid = None if gid=='_' else gid
-    g_vec_flag = True  # g_vec이 있는 경우
     dics1= {}
     for _ in range(3):
         try:  # # redis에서 이유 없이 None 이 나오는 경우가 매우 드물게 있어서 3번 시도.
@@ -54,14 +51,12 @@ async def hello(ga:str, gid:str=None):
                     if g_vec is not None:  # gid에 해당하는 벡터가 있음
                         pass  # 걍 하면 됨
                     else:  # gid에 해당하는 벡터가 없음
-                        g_vec_flag = False
                         g_vec = u_vec  # 유저 벡터를 기사 벡터로 씀 (이전에 봤던게 더 강화됨)
                 else:  # ga에 해당하는 벡터가 없음. 처음오는 손님
                     if g_vec is not None:  # gid에 해당하는 벡터는 있음
                         u_vec = g_vec
                     else:  # gid에 해당하는 벡터도 없음
                         # 완전히 새로운 추천
-                        g_vec_flag = False
                         u_vec = r2.get('default0')
                         g_vec = u_vec
             u_vec = np.frombuffer(u_vec, dtype='float32')
@@ -101,24 +96,7 @@ async def hello(ga:str, gid:str=None):
             for i, x in enumerate(top10):
                 if gid != gid_list[x]:
                     dics1[i] = {'title': title_list[x], 'url': url_list[x], 'thumburl': thumburl_list[x]}
-
-            #### 동아닷컴 유저 정보 수집 ####
-            if len(ga) > 40 and gid != None and g_vec_flag:  # 동닷유저일 경우 + gid 가 왔을경우 + g_vec이 있는 경우
-                dics4= r4.get(ga)
-                if dics4 == None:
-                    dics4 = {'gids':[], 'vecs':[], 'cent':[]}
-                else:
-                    dics4 = pickle.loads(dics4)  
-                dics4['gids'].append(gid)
-                dics4['gids'] = dics4['gids'][-40:]
-                dics4['vecs'].append(g_vec)
-                dics4['vecs'] = dics4['vecs'][-40:]
-                r4.set(ga, pickle.dumps(dics4))
-                r4.expire(ga, 5184000) # 60*60*24*60 두달
-                    
-            #######
             break
-        
         except Exception as e:
             traceback.print_exc()
             print(e)
