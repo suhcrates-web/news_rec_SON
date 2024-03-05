@@ -32,8 +32,11 @@ r1 = redis.Redis(connection_pool=pool1)
 r2 = redis.Redis(connection_pool=pool2)
 r3 = redis.Redis(connection_pool=pool3)
 r4 = redis.Redis(connection_pool=pool4)
+
+
+### ai 추천포유
 @app.get("/{ga}/{gid}")
-async def hello(ga:str, gid:str=None):
+async def hello(ga:str, gid:str=None, login_user:bool=False):
     gid = None if gid=='_' else gid
     g_vec_flag = True  # g_vec이 있는 경우
     dics1= {}
@@ -103,16 +106,17 @@ async def hello(ga:str, gid:str=None):
                     dics1[i] = {'title': title_list[x], 'url': url_list[x], 'thumburl': thumburl_list[x]}
 
             #### 동아닷컴 유저 정보 수집 ####
-            if len(ga) > 40 and gid != None and g_vec_flag:  # 동닷유저일 경우 + gid 가 왔을경우 + g_vec이 있는 경우
+            if login_user:
+            # if len(ga) > 40 and gid != None and g_vec_flag:  # 동닷유저일 경우 + gid 가 왔을경우 + g_vec이 있는 경우
                 dics4= r4.get(ga)
                 if dics4 == None:
                     dics4 = {'gids':[], 'vecs':[], 'cent':[]}
                 else:
                     dics4 = pickle.loads(dics4)  
                 dics4['gids'].append(gid)
-                dics4['gids'] = dics4['gids'][-40:]
+                dics4['gids'] = dics4['gids'][-20:]
                 dics4['vecs'].append(g_vec)
-                dics4['vecs'] = dics4['vecs'][-40:]
+                dics4['vecs'] = dics4['vecs'][-20:]
                 r4.set(ga, pickle.dumps(dics4))
                 r4.expire(ga, 5184000) # 60*60*24*60 두달
                     
@@ -123,6 +127,12 @@ async def hello(ga:str, gid:str=None):
             traceback.print_exc()
             print(e)
     return dics1
+
+
+
+
+
+
 
 # if __name__ == '__main__':
 #     uvicorn.run(app, port=8001, host='0.0.0.0')

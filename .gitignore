@@ -7,6 +7,7 @@ make_test_user_db.py
 test*.py
 *.model
 exp*.py
+expp*.py
 *.txt
 !ReadMe.txt
 *.log
